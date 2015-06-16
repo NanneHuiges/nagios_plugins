@@ -2,7 +2,8 @@
 #
 # File ages in a directory plugin for Nagios.
 # Written by Chad Phillips (chad@apartmentlines.com)
-# Last Modified: 2009-02-12
+# Updated by Nanne Huiges (nanne@huiges.nl)
+# Last Modified: 2015-06-16
 
 PROGPATH=`dirname $0`
 REVISION=`echo '$Revision: 1 $' | sed -e 's/[^0-9.]//g'`
