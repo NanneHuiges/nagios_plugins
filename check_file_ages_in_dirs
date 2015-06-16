@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 #
 # File ages in a directory plugin for Nagios.
 # Written by Chad Phillips (chad@apartmentlines.com)
@@ -11,7 +11,7 @@ REVISION=`echo '$Revision: 1 $' | sed -e 's/[^0-9.]//g'`
 
 print_usage() {
     echo "
-Usage: check_file_ages_in_dirs --dirs | -d <directories> [-w <max_age>] [-c <max_age>] [-W <num_files>] [-C <num_files>] [-t <time_unit>] [-V] [--check-dirs] [--base-dir <directory>]
+Usage: check_file_ages_in_dirs --dirs | -d <directories> [-w <max_age>] [-c <max_age>] [-W <num_files>] [-C <num_files>] [-t <time_unit>] [-V] [-I <filenames>] [--check-dirs] [--base-dir <directory>]
 Usage: check_file_ages_in_dirs --help | -h
 
 Description:
@@ -50,6 +50,8 @@ The following arguments are accepted:
   -V              (Optional) Output verbose information about all checked
                   files.  Default is only to print verbose information for
                   files with non-OK states.
+
+  -I              (Optional) A space separated list of files to ignore.
 
   --check-dirs    (Optional) If set, directories inside the specified directory
                   will also be checked for their creation time. Note that this
@@ -146,6 +148,10 @@ while test -n "$1"; do
             ;;
         -d)
             dirs=$2
+            shift
+            ;;
+        -I)
+            files=$2
             shift
             ;;
         -w)
@@ -261,6 +267,16 @@ OUTPUT=
 CURRENT_TIME=`date +%s`
 OS_DISTRO=`uname -s`
 
+#build ignore list
+ignore=
+ignore_s="-I "
+for file in $files
+do
+	ignore=1
+	ignore_s="$ignore_s $file"
+done
+
+
 # Loop through each provided directory.
 for dir in $dirs
 do
@@ -270,7 +286,11 @@ do
 	# Check if dir exists.
 	full_path=${base_dir}${dir}
 	if [ -d "$full_path" ]; then
-		file_list=`ls -t $full_path`
+		if [ "$ignore" ]; then
+			file_list=`ls -t $full_path $ignore_s`
+		else
+			file_list=`ls -t $full_path`
+		fi
 		# Cycle through files, looking for checkable files.
 		for next_file in $file_list
 		do
